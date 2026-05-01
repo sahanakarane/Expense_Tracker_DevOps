@@ -56,13 +56,12 @@ pipeline {
 stage('SonarCloud Analysis') {
     steps {
         dir('expense-tracker-service') {
-            withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+            withSonarQubeEnv('SonarCloud') {
                 bat """
                 mvn clean verify sonar:sonar ^
                 -Dsonar.projectKey=sahanakarane_Expense_Tracker_DevOps ^
                 -Dsonar.organization=sahanakarane ^
-                -Dsonar.host.url=https://sonarcloud.io ^
-                -Dsonar.token=%SONAR_TOKEN%
+                -Dsonar.host.url=https://sonarcloud.io
                 """
             }
         }
@@ -78,21 +77,22 @@ stage('SonarCloud Analysis') {
     }
 }
 
-    stage('Quality Gate') {
-        steps {
-            script {
-                timeout(time: 2, unit: 'MINUTES') {
-                    def qualityGate = waitForQualityGate()
-                    if (qualityGate.status != 'OK') {
-                        error "SonarCloud Quality Gate failed: ${qualityGate.status}"
-                    } else {
-                        echo 'SonarCloud Quality Gate passed.'
-                    }
-                }
-            }
+stage('Quality Gate') {
+    steps {
+        timeout(time: 5, unit: 'MINUTES') {
+            waitForQualityGate abortPipeline: true
         }
-
     }
+
+    post {
+        success {
+            echo 'Quality Gate passed successfully.'
+        }
+        failure {
+            echo 'Quality Gate failed. Check SonarCloud issues.'
+        }
+    }
+}
 
 //         stage('Deploy to Render') {
 //             steps {
