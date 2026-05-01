@@ -53,33 +53,47 @@ pipeline {
             }
         }
 
-        // stage('Sonar') {
-        //     steps {
-        //         dir('expense-tracker-service') {
-        //             withSonarQubeEnv('sonarqube-25.4.0.105899') {
-        //                 bat 'mvn sonar:sonar'
-        //             }
-        //         }
-        //     }
+stage('SonarCloud Analysis') {
+    steps {
+        dir('expense-tracker-service') {
+            withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                bat """
+                mvn clean verify sonar:sonar ^
+                -Dsonar.projectKey=sahanakarane_Expense_Tracker_DevOps ^
+                -Dsonar.organization=sahanakarane ^
+                -Dsonar.host.url=https://sonarcloud.io ^
+                -Dsonar.token=%SONAR_TOKEN%
+                """
+            }
+        }
+    }
 
-        //     post {
-        //         success {
-        //             script {
-        //                 timeout(time: 1, unit: 'MINUTES') {
-        //                     def qualityGate = waitForQualityGate()
-        //                     if (qualityGate.status != 'OK') {
-        //                         error "SonarQube Quality Gate failed: ${qualityGate.status}"
-        //                     } else {
-        //                         echo "SonarQube analysis passed."
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //         failure {
-        //             echo "SonarQube analysis failed during execution."
-        //         }
-        //     }
-        // }
+    post {
+        success {
+            echo 'SonarCloud analysis completed successfully.'
+        }
+        failure {
+            echo 'SonarCloud analysis failed during execution.'
+        }
+    }
+}
+
+    stage('Quality Gate') {
+        steps {
+            script {
+                timeout(time: 2, unit: 'MINUTES') {
+                    def qualityGate = waitForQualityGate()
+                    if (qualityGate.status != 'OK') {
+                        error "SonarCloud Quality Gate failed: ${qualityGate.status}"
+                    } else {
+                        echo 'SonarCloud Quality Gate passed.'
+                    }
+                }
+            }
+        }
+
+    }
+
 //         stage('Deploy to Render') {
 //             steps {
 //                 script {
