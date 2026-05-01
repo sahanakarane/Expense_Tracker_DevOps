@@ -5,7 +5,7 @@ pipeline {
         skipDefaultCheckout()
     }
     tools {
-        jdk "JDK17"
+        jdk "JDK 17"
         maven "mvn"
         nodejs "NodeJS 25.9.0"
     }
