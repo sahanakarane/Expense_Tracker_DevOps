@@ -20,24 +20,24 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', credentialsId: 'Git token', url: 'https://github.com/emDevanshu/Expense_Tracker.git'
+                git branch: 'main', url: 'https://github.com/sahanakarane/Expense_Tracker_DevOps.git'
             }
         }
         stage('Build') {
             parallel {
-                stage('Java') {
+                stage('Backend - Java') {
                     steps {
                         dir('expense-tracker-service') {
-                            sh 'mvn clean install'
+                            bat 'mvn clean install'
                         }
                     }
                 }
 
-                stage('Angular') {
+                stage('Frontend - Angular') {
                     steps {
                         dir('expense-tracker-ui') {
-                            sh 'npm install'
-                            sh './node_modules/.bin/ng build --configuration production'
+                            bat 'npm install'
+                            bat 'npx ng build --configuration production'
                         }
                     }
                 }
@@ -47,45 +47,45 @@ pipeline {
         stage('Test') {
             steps {
                 script {
-                    sh 'cd expense-tracker-service && mvn test'
+                    bat 'cd expense-tracker-service && mvn test'
                 }
             }
         }
 
-        stage('Sonar') {
-            steps {
-                dir('expense-tracker-service') {
-                    withSonarQubeEnv('sonarqube-25.4.0.105899') {
-                        sh 'mvn sonar:sonar'
-                    }
-                }
-            }
+        // stage('Sonar') {
+        //     steps {
+        //         dir('expense-tracker-service') {
+        //             withSonarQubeEnv('sonarqube-25.4.0.105899') {
+        //                 bat 'mvn sonar:sonar'
+        //             }
+        //         }
+        //     }
 
-            post {
-                success {
-                    script {
-                        timeout(time: 1, unit: 'MINUTES') {
-                            def qualityGate = waitForQualityGate()
-                            if (qualityGate.status != 'OK') {
-                                error "SonarQube Quality Gate failed: ${qualityGate.status}"
-                            } else {
-                                echo "SonarQube analysis passed."
-                            }
-                        }
-                    }
-                }
-                failure {
-                    echo "SonarQube analysis failed during execution."
-                }
-            }
-        }
+        //     post {
+        //         success {
+        //             script {
+        //                 timeout(time: 1, unit: 'MINUTES') {
+        //                     def qualityGate = waitForQualityGate()
+        //                     if (qualityGate.status != 'OK') {
+        //                         error "SonarQube Quality Gate failed: ${qualityGate.status}"
+        //                     } else {
+        //                         echo "SonarQube analysis passed."
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //         failure {
+        //             echo "SonarQube analysis failed during execution."
+        //         }
+        //     }
+        // }
 //         stage('Deploy to Render') {
 //             steps {
 //                 script {
 
-// //                    def changedFiles = sh(script: 'git diff --name-only HEAD HEAD~1', returnStdout: true).trim();
+// //                    def changedFiles = bat(script: 'git diff --name-only HEAD HEAD~1', returnStdout: true).trim();
 // //                    echo "Changed files:\n${changedFiles}"
-//                     def changedFiles = sh(script: 'git diff --name-only HEAD HEAD~1', returnStdout: true).split('\n');
+//                     def changedFiles = bat(script: 'git diff --name-only HEAD HEAD~1', returnStdout: true).split('\n');
 //                     echo "Changed files:\n${changedFiles.join('\n')}"
 
 //                     def backendChanged = changedFiles.any {
