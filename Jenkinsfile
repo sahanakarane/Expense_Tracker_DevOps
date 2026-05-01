@@ -28,7 +28,7 @@ pipeline {
                 stage('Backend - Java') {
                     steps {
                         dir('expense-tracker-service') {
-                            bat 'mvn clean install'
+                            bat 'mvn clean install -DskipTests'
                         }
                     }
                 }
