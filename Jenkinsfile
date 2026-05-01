@@ -56,7 +56,7 @@ pipeline {
 stage('SonarCloud Analysis') {
     steps {
         dir('expense-tracker-service') {
-            withSonarQubeEnv('SonarCloud') {
+            withSonarQubeEnv {
                 bat """
                 mvn clean verify sonar:sonar ^
                 -Dsonar.projectKey=sahanakarane_Expense_Tracker_DevOps ^
