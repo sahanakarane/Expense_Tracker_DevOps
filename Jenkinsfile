@@ -6,7 +6,7 @@ pipeline {
     }
     tools {
         maven "mvn"
-        nodejs "node"
+        nodejs "NodeJS 25.9.0"
     }
 
     environment {
